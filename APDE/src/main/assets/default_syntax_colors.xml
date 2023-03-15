@@ -68,6 +68,7 @@
         <keyword style="keyword_processing_function" function="true" reference="processing_android" reference_target="vr/object">getObjectMatrix</keyword>
         
         <!-- Processing functions -->
+        <keyword style="keyword_processing_function" function="true">exit</keyword>
         <keyword style="keyword_processing_function" function="true">size</keyword>
 		<keyword style="keyword_processing_function" function="true">fullScreen</keyword>
         <keyword style="keyword_processing_function" function="true">println</keyword>
