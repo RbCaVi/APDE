@@ -24,6 +24,8 @@ public class AutoFormat implements Tool {
 	public String getMenuTitle() {
 		return context.getResources().getString(R.string.tool_auto_format);
 	}
+
+        private static final Pattern INDENT_REGEX = Pattern.compile("^(\\s*)");
 	
 	@Override
 	public void run() {
@@ -32,7 +34,47 @@ public class AutoFormat implements Tool {
 		if(!context.isExample() && code != null) {
 			processing.app.Preferences.setInteger("editor.tabs.size", 2);
 			
-			code.setUpdateText((new processing.mode.java.AutoFormat()).format(code.getText().toString()));
+			if (getSelectionStart() == getSelectionEnd() ) {
+			    code.setUpdateText((new processing.mode.java.AutoFormat()).format(code.getText().toString()));
+                        } else {
+                            
+			Matcher matcher=INDENT_REGEX.matcher(line);
+			
+			String codeText = code.getText().toString();
+			
+			boolean trailingNewline = codeText.charAt(codeText.length() - 1) == '\n';
+			
+			String[] lines = codeText.split("\n");
+			
+			int startLine = code.lineForOffset(code.getSelectionStart());
+			int endLine = code.lineForOffset(code.getSelectionEnd()) + 1;
+			
+			String[] toIndent = new String[endLine - startLine];
+			System.arraycopy(lines, startLine, toIndent, 0, endLine - startLine);
+	
+			for(int i = 0; i < toIndent.length; i ++) {
+				toIndent[i] = indent + toIndent[i];
+			}
+			
+			System.arraycopy(toIndent, 0, lines, startLine, endLine - startLine);
+			
+			String text = "";
+			for(String line : lines) {
+				text += line + "\n";
+			}
+			
+			if(!trailingNewline) {
+				text = text.substring(0, text.length() - 1);
+			}
+			
+			code.setUpdateText(text);
+			code.clearTokens();
+			
+			code.setSelection(code.offsetForLine(startLine), code.offsetForLineEnd(endLine - 1) - (trailingNewline || endLine < lines.length ? 1 : 0));
+			//The current implementation of this function is ugly, but we don't have any alternatives...
+			code.startSelectionActionMode();
+                        }
+
 			code.clearTokens();
 			code.flagRefreshTokens();
 			
